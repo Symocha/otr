@@ -11,7 +11,7 @@ abstract class OtrColors {
   static const borderDim = Color(0xFF3D2B4F);
   static const divider = Color(0xFF2A2035);
 
-  static const textPrimary = Color(0xFFEDE9F5);
+  static const textPrimary = Color(0xFFF73F7A);
   static const textSecondary = Color(0xFFB8AEC9);
   static const textMuted = Color(0xFF7E7590);
   static const textDisabled = Color(0xFF6E6580);
@@ -19,7 +19,7 @@ abstract class OtrColors {
   /// Muted player-name color for a "no" (unrelated) guess row.
   static const nameNeutral = Color(0xFF8A8296);
 
-  static const magenta = Color(0xFFFF2D95);
+  static const magenta = Color(0xFFF83C79);
   static const onMagenta = Color(0xFF3D0022);
 
   static const cyan = Color(0xFF00E5FF);
