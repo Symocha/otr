@@ -12,14 +12,10 @@ class OtrLogo extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
+        Image.asset(
+          'images/SQ-6.png',
           width: 110,
           height: 110,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: OtrColors.magenta,
-            boxShadow: [BoxShadow(color: OtrColors.magenta.withValues(alpha: 0.45), blurRadius: 30, spreadRadius: 2)],
-          ),
         ),
         const SizedBox(width: 12),
         const Text(

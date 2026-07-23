@@ -34,8 +34,8 @@ class playPage extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         SizedBox(
-                          width: 230,
-                          height: 230,
+                          width: 130,
+                          height: 130,
                           child: ElevatedButton(
                             onPressed: () async{
                               Navigator.push(context, MaterialPageRoute(
@@ -61,8 +61,8 @@ class playPage extends StatelessWidget {
                         ),
                         const SizedBox(width: 16),
                         SizedBox(
-                          width: 230,
-                          height: 230,
+                          width: 130,
+                          height: 130,
                           child: OutlinedButton(
                             onPressed: () async{
                               Navigator.push(context, MaterialPageRoute(
