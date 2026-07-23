@@ -1,0 +1,5 @@
+// Spotify does not publish App Remote to Maven Central; spotify_sdk 3.0.2
+// expects it vendored locally as a Gradle project. AAR downloaded from the
+// official release: https://github.com/spotify/android-sdk/releases
+configurations.maybeCreate("default")
+artifacts.add("default", file('spotify-app-remote-release-0.8.0.aar'))

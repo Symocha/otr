@@ -1,0 +1,12 @@
+{
+  "name": "2000s Hits",
+  "tracks": [
+    {"spotifyTrackId": "003vvx7Niy0yvhvHt4a68B", "title": "Mr. Brightside", "artist": "The Killers"},
+    {"spotifyTrackId": "60a0Rd6pjrkxjPbaKzXjfq", "title": "In the End", "artist": "Linkin Park"},
+    {"spotifyTrackId": "6I9VzXrHxO9rA9A5euc8Ak", "title": "Toxic", "artist": "Britney Spears"},
+    {"spotifyTrackId": "3dPQuX8Gs42Y7b454ybpMR", "title": "Seven Nation Army", "artist": "The White Stripes"},
+    {"spotifyTrackId": "0BCPKOYdS2jbQ8iyB56Zns", "title": "Clocks", "artist": "Coldplay"},
+    {"spotifyTrackId": "2nLtzopw4rPReszdYBJU6h", "title": "Numb", "artist": "Linkin Park"},
+    {"spotifyTrackId": "0d28khcov6AiegSCpG5TuT", "title": "Feel Good Inc.", "artist": "Gorillaz"}
+  ]
+}

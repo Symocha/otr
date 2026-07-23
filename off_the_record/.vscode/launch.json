@@ -1,0 +1,12 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch login_ui (Chrome)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/pages/login_ui.dart",
+      "deviceId": "chrome"
+    }
+  ]
+}

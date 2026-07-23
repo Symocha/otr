@@ -1,0 +1,3 @@
+C:\Users\trao3521\Desktop\flut\flutter\bin\flutter.bat run -t lib/pages/login_ui.dart -d chrome
+
+//Launch in root

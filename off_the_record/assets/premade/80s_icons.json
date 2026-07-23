@@ -1,0 +1,12 @@
+{
+  "name": "80s Icons",
+  "tracks": [
+    {"spotifyTrackId": "5ChkMS8OtdzJeqyybCc9R5", "title": "Billie Jean", "artist": "Michael Jackson"},
+    {"spotifyTrackId": "2WfaOiMkCvy7F5fcp2zZ8L", "title": "Take on Me", "artist": "a-ha"},
+    {"spotifyTrackId": "2374M0fQpWi3dLnB54qaLX", "title": "Africa", "artist": "Toto"},
+    {"spotifyTrackId": "1JSTJqkT5qHq8MDJnJbRE1", "title": "Every Breath You Take", "artist": "The Police"},
+    {"spotifyTrackId": "2KH16WveTQWT6KOG9Rg6e2", "title": "Eye of the Tiger", "artist": "Survivor"},
+    {"spotifyTrackId": "05wIrZSwuaVWhcv5FfqeH0", "title": "Walking On Sunshine", "artist": "Katrina & The Waves"},
+    {"spotifyTrackId": "1TfqLAPs4K3s2rJMoCokcS", "title": "Sweet Dreams (Are Made of This)", "artist": "Eurythmics"}
+  ]
+}

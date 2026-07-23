@@ -1,0 +1,13 @@
+{
+  "name": "Rock Classics",
+  "tracks": [
+    {"spotifyTrackId": "7tFiyTwD0nx5a1eklYtX2J", "title": "Bohemian Rhapsody", "artist": "Queen"},
+    {"spotifyTrackId": "7o2CTH4ctstm8TNelqjb51", "title": "Sweet Child O' Mine", "artist": "Guns N' Roses"},
+    {"spotifyTrackId": "5ghIJDpPoe3CfHMGu71E6T", "title": "Smells Like Teen Spirit", "artist": "Nirvana"},
+    {"spotifyTrackId": "40riOy7x9W7GXjyGp4pjAv", "title": "Hotel California", "artist": "Eagles"},
+    {"spotifyTrackId": "08mG3Y1vljYA6bvDt4Wqkj", "title": "Back In Black", "artist": "AC/DC"},
+    {"spotifyTrackId": "5CQ30WqJwcep0pYcV4AMNc", "title": "Stairway to Heaven", "artist": "Led Zeppelin"},
+    {"spotifyTrackId": "37ZJ0p5Jm13JPevGcx4SkF", "title": "Livin' On A Prayer", "artist": "Bon Jovi"},
+    {"spotifyTrackId": "4bHsxqR3GMrXTxEPLuK5ue", "title": "Don't Stop Believin'", "artist": "Journey"}
+  ]
+}
