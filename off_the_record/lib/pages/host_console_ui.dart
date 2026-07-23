@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 import 'package:off_the_record/audio/spotify_playback.dart';
 import 'package:off_the_record/game/game_session.dart';
@@ -19,7 +20,16 @@ class HostConsolePage extends StatefulWidget {
   /// Silently ignored for tracks with unknown duration.
   final bool randomSeek;
 
-  const HostConsolePage({super.key, required this.session, this.randomSeek = false});
+  /// Connection established by the lobby's readiness check (§4b). Ownership
+  /// transfers here — the console disconnects it on the way out.
+  final SpotifyPlayback? playback;
+
+  const HostConsolePage({
+    super.key,
+    required this.session,
+    this.randomSeek = false,
+    this.playback,
+  });
 
   @override
   State<HostConsolePage> createState() => _HostConsolePageState();
@@ -27,7 +37,7 @@ class HostConsolePage extends StatefulWidget {
 
 class _HostConsolePageState extends State<HostConsolePage> {
   Timer? _tick;
-  final _playback = SpotifyPlayback();
+  late final SpotifyPlayback _playback = widget.playback ?? SpotifyPlayback();
   bool _spotifyConnecting = true;
   int? _lastPlaybackRoundIndex;
   bool _revealPaused = false;
@@ -35,10 +45,19 @@ class _HostConsolePageState extends State<HostConsolePage> {
   @override
   void initState() {
     super.initState();
+    // The host is the DJ console: propped up, untouched, and simultaneously
+    // running the WebSocket server, the round timer and playback (§4/§8.5).
+    // Letting the screen sleep would kill all three.
+    WakelockPlus.enable();
     widget.session.addListener(_onChanged);
     widget.session.start();
     _playback.addListener(_onChanged);
-    _connectPlayback();
+    if (_playback.isConnected) {
+      _spotifyConnecting = false;
+      _syncPlaybackToRound();
+    } else {
+      _connectPlayback();
+    }
     _tick = Timer.periodic(const Duration(milliseconds: 200), (_) {
       if (mounted) setState(() {});
     });
@@ -93,6 +112,7 @@ class _HostConsolePageState extends State<HostConsolePage> {
   @override
   void dispose() {
     _tick?.cancel();
+    WakelockPlus.disable();
     widget.session.removeListener(_onChanged);
     _playback.removeListener(_onChanged);
     _playback.disconnect();

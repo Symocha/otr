@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:off_the_record/api/spotApi.dart';
-import 'package:off_the_record/dto/transfer.dart';
+import 'package:off_the_record/state/session_state.dart';
 import 'package:off_the_record/pages/login_ui.dart';
 import 'package:off_the_record/pages/play_ui.dart';
 import 'package:off_the_record/pages/playlist_ui.dart';
@@ -18,11 +18,12 @@ class _MainShellState extends State<MainShell> {
 
   static const List<Widget> _pages = [
     playPage(),
-    playlistPage(),
+    PlaylistPage(),
   ];
 
   Future<void> _logout() async {
     await SpotApi.logout();
+    sessionState.clear();
     if (!mounted) return;
     Navigator.pushAndRemoveUntil(
       context,
@@ -49,7 +50,7 @@ class _MainShellState extends State<MainShell> {
                 const Icon(Icons.person, color: OtrColors.textPrimary, size: 40),
                 const SizedBox(width: 12),
                 Text(
-                  playerName.isNotEmpty ? playerName : 'Guest',
+                  sessionState.displayName,
                   style: const TextStyle(
                     color: OtrColors.textPrimary,
                     fontSize: 22,
@@ -92,7 +93,7 @@ class _MainShellState extends State<MainShell> {
               ),
               const SizedBox(width: 16),
               Text(
-                playerName.isNotEmpty ? playerName : 'Guest',
+                sessionState.displayName,
                 style: const TextStyle(
                   color: OtrColors.textPrimary,
                   fontWeight: FontWeight.w600,

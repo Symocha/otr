@@ -37,6 +37,10 @@ class GameSession extends ChangeNotifier {
   final int roundDurationMs;
   final int revealDurationMs;
 
+  /// Songs played per game, picked in the lobby (OffTheRecord_HANDOFF.md §11).
+  /// A playlist shorter than this simply plays all of its tracks.
+  final int maxRounds;
+
   late final List<LocalTrack> _order;
   Timer? _roundTimer;
   Timer? _revealTimer;
@@ -56,6 +60,7 @@ class GameSession extends ChangeNotifier {
     required this.playlist,
     this.roundDurationMs = 30000,
     this.revealDurationMs = 6000,
+    this.maxRounds = 10,
   });
 
   int get totalRounds => _order.length;
@@ -94,7 +99,8 @@ class GameSession extends ChangeNotifier {
   }
 
   void start() {
-    _order = List.of(playlist.tracks)..shuffle(Random());
+    final shuffled = List.of(playlist.tracks)..shuffle(Random());
+    _order = shuffled.take(maxRounds).toList(growable: false);
     server.onGuess = _handleGuess;
     _startRound(0);
   }

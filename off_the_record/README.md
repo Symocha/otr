@@ -1,16 +1,37 @@
 # off_the_record
 
-A new Flutter project.
+A local-multiplayer music guessing game for Android. The host runs a lobby and
+plays tracks through Spotify; players join over the local network by scanning a
+QR code and guess song titles against a timer.
 
-## Getting Started
+See `OffTheRecord_HANDOFF.md` for the full product and architecture spec.
 
-This project is a starting point for a Flutter application.
+## Setup
 
-A few resources to get you started if this is your first Flutter project:
+The Spotify client ID is **not** checked in (handoff §9). Before the first run:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+```bash
+cp dart_defines.example.json dart_defines.json
+# edit dart_defines.json and paste your Spotify client ID
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Then run or build with the defines file:
+
+```bash
+flutter run   --dart-define-from-file=dart_defines.json
+flutter build apk --dart-define-from-file=dart_defines.json
+```
+
+`dart_defines.json` is gitignored. Without it the app still builds, but any
+Spotify call throws a `StateError` naming the missing define.
+
+In the Spotify developer dashboard, the same app must register both redirect
+URIs — `off-the-record://callback` (Web API PKCE login) and `spotify-sdk://auth`
+(App Remote) — plus the Android package name and your keystore's SHA-1.
+
+## Tests
+
+```bash
+flutter test
+flutter analyze
+```

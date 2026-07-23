@@ -7,11 +7,16 @@
         android:label="off_the_record"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <!-- android:taskAffinity is deliberately absent. flutter_web_auth_2
+             requires launchMode="singleTop" with NO taskAffinity entry; with
+             the Flutter template's android:taskAffinity="" the OAuth
+             CallbackActivity resolves into a different task, so the Spotify
+             consent Custom Tab is never dismissed after the redirect.
+             See flutter_web_auth_2 README "Troubleshooting Android". -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
-            android:taskAffinity=""
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"

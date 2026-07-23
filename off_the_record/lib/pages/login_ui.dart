@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:off_the_record/api/spotApi.dart';
-import 'package:off_the_record/dto/transfer.dart';
+import 'package:off_the_record/state/session_state.dart';
 import 'package:off_the_record/shell/mainShell.dart';
 import 'package:off_the_record/storage/playlist_repository.dart';
 import 'package:off_the_record/theme/otr_logo.dart';
@@ -72,7 +72,7 @@ class _LoginPageState extends State<LoginPage> {
       );
       return;
     }
-    playerName = name;
+    sessionState.playerName = name;
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => const MainShell()),

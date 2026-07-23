@@ -46,6 +46,7 @@ dependencies:
   hive_ce_flutter: ^2.3.4
   diacritic: ^0.1.6
   spotify_sdk: 3.0.2
+  wakelock_plus: ^1.5.2
 
 dev_dependencies:
   flutter_test:

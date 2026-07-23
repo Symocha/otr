@@ -1,52 +1,89 @@
 # ResumeOffload — OffTheRecord Session Summary
 
-This supersedes `offloading.md` (repo root), which reflects the state *before* this session and is now stale.
+This supersedes `offloading.md` (repo root), which is stale.
 
 ## Current State
 
-All four roadmap priorities from `OffTheRecord_HANDOFF.md` are implemented and committed, plus a full neon visual pass. Current branch: **`playback`** (tip of the work), branched off `ScoreLogic` ← `playlists` ← `playPage` ← `main`.
+Every item in `OffTheRecord_HANDOFF.md` is now implemented, including the §4b
+hotspot flow, the §5 playlist extras, the §9 cleanup phase, and the §11 open
+questions (resolved using the defaults the handoff itself suggests).
 
-Commit history for this session, oldest first:
+`flutter analyze` reports 3 issues, all pre-existing naming lints
+(`spotApi.dart`, `mainShell.dart`, `playPage`). 65 tests pass. Debug APK builds.
 
-| Commit | Branch | What |
-|---|---|---|
-| `eca832f` | `playPage` | Priority 1 — Lobby networking (WebSocket host/client, QR join, protocol) |
-| `73ba8e9` | `playlists` | Priority 2 — Playlist storage (Hive, premades, local CRUD, Spotify import) |
-| `7cbd0d4` | `ScoreLogic` | Priority 3 — Guess scoring (fuzzy match, round state machine, DJ console + guess screen split) |
-| `ec2dc33` | `playback` | Priority 4 — Spotify Remote Playback (spotify_sdk, vendored App Remote AAR, pause/resume on disconnect) |
-| `4cba28a` | `playback` | Reworked host console + player guess screen to match two owner-provided neon HTML mockups; added `round_progress` protocol message |
-| `a792944` | `playback` | Extended the neon palette to Login, Play, Lobby, Join, and MainShell chrome |
+## Completed This Session
 
-None of this is merged to `main` yet — it all lives on `playback`.
+**§9 Config & hygiene**
+- Spotify client ID removed from source. `lib/config/env.dart` reads
+  `String.fromEnvironment('SPOTIFY_CLIENT_ID')`; supply it via
+  `--dart-define-from-file=dart_defines.json` (gitignored, with a checked-in
+  `dart_defines.example.json`). A missing define throws a `StateError` naming
+  the fix instead of sending an empty `client_id` to Spotify.
+- `lib/dto/transfer.dart`'s bare `String playerName` global replaced by
+  `lib/state/session_state.dart` — an observable `SessionState` singleton
+  matching the `playlistRepository` / `hotspotSettings` pattern already used
+  throughout. Deliberately **not** a provider/riverpod migration: the codebase
+  is consistently `ChangeNotifier` + listeners, and a framework swap would be
+  churn across every screen for no functional gain.
+- README documents setup; `.vscode/launch.json` passes the defines file.
 
-## What Is Implemented
+**Bug fix — Spotify consent screen never closed.** The Flutter template's
+`android:taskAffinity=""` on `MainActivity` put `flutter_web_auth_2`'s
+`CallbackActivity` in a different task, so the OAuth redirect never brought the
+app back over the Custom Tab. Removed the attribute (the package README calls
+this out explicitly: `launchMode="singleTop"` with *no* taskAffinity entry).
+Also hardened `SpotApi`: a denied consent screen (`?error=`) and a failed token
+exchange now throw readable errors instead of a null-assertion crash.
 
-- **Networking** (`lib/net/`): `protocol.dart` (full message set incl. `round_progress`), `host_server.dart` (WebSocket server, keepalive, reconnect-by-name), `game_client.dart`, `network_utils.dart` (hotspot-aware IP resolution).
-- **Storage** (`lib/storage/`): `models.dart` (`LocalPlaylist`/`LocalTrack`), `playlist_repository.dart` (Hive-backed CRUD, premade import, Spotify import/resync). Premades in `assets/premade/*.json` — track IDs individually verified against Spotify's oEmbed endpoint.
-- **Game logic** (`lib/game/`): `scoring.dart` (normalize + Levenshtein + threshold/point curve), `game_session.dart` (host-only round state machine, pause/resume, guess feed, round_progress ticker).
-- **Audio** (`lib/audio/spotify_playback.dart`): host-only `spotify_sdk` wrapper, try/catch-as-disconnect-signal pattern.
-- **Theme** (`lib/theme/`): `palette.dart` (`OtrColors`, now applied app-wide except Playlists), `otr_logo.dart` (shared "T R" mark).
-- **Screens**: `login_ui.dart`, `play_ui.dart`, `join_ui.dart`, `lobby_ui.dart`, `host_console_ui.dart` (DJ console), `player_game_ui.dart` (guess screen) — all neon-themed and wired to real state. `playlist_ui.dart` / `playlist_detail_ui.dart` still use the original teal/dark-blue look (explicitly out of scope so far).
-- Tests: `test/net/`, `test/storage/`, `test/game/` (incl. `game_session_test.dart` for pause/resume timing), `test/widget_test.dart`. 39 tests, all passing as of `a792944`.
+**§4/§4b Networking gaps**
+- `lib/net/hotspot_settings.dart` — standard `WIFI:S:…;T:WPA;P:…;;` QR payload
+  builder with correct escaping of the reserved `\ ; , : "` characters, plus
+  secure-storage persistence of the host's SSID/password (Android blocks apps
+  from reading their own hotspot credentials).
+- `lib/pages/join_qr_card.dart` — the two-step lobby join: step 1 Wi-Fi QR,
+  step 2 game QR, with an editor for the hotspot details.
+- Player join screen carries the "tap *stay connected*" hint for Android's
+  no-internet prompt.
+- Host lobby runs the §4b pre-game readiness check: it establishes the App
+  Remote connection *before* the game starts and hands the live connection to
+  the DJ console, so the handshake can't stall the first round.
+- `wakelock_plus` holds the screen awake on the DJ console.
 
-## Known Gaps / Deferred Scope
+**§5 Playlist extras**
+- `SpotApi.searchTracks` (`/v1/search`) + `lib/pages/track_search_ui.dart`
+  (debounced, request-id guarded against out-of-order responses).
+- `SpotApi.createPlaylist` / `addTracksToPlaylist` and
+  `PlaylistRepository.publishAsCollaborative` — pushes a local playlist up as a
+  private collaborative Spotify playlist and links it. Collaboration stays
+  Spotify's; the app only re-syncs. Scopes widened accordingly.
+- `PlaylistRepository.create` / `addTrack` (dedupes) for building from scratch.
 
-- **Priority 2 extras (deferred by owner decision)**: Spotify track search-and-add for building custom playlists, and collaborative-playlist creation via the Spotify Web API. Storage/CRUD/import foundation is done; these are additive.
-- **Roadmap cleanup phase (§9, not started)**: Spotify client ID is still hardcoded in `lib/api/spotApi.dart` (needs `--dart-define`/gitignored `env.dart`); no `provider`/`riverpod` state-management refactor has been done (deliberately kept minimal — `ChangeNotifier` + listeners throughout).
-- **Playlists tab**: still on the original palette; user has not asked for this yet.
-- **Owner-only follow-ups I cannot do myself**:
-  - Spotify Developer Dashboard: add `spotify-sdk://auth` as a redirect URI (alongside the existing `off-the-record://callback`) on the same app as `SpotApi.clientId`, and register the package name (`com.example.off_the_record`, still template default) + your keystore's SHA-1.
-  - All on-device verification (two-device lobby join over Wi-Fi/hotspot, actual Spotify App Remote playback with Premium) — I have no physical Android device.
-- **Vendored binary**: `android/spotify-app-remote/spotify-app-remote-release-0.8.0.aar` is committed (downloaded from Spotify's official `spotify/android-sdk` GitHub releases) because `spotify_sdk` 3.0.2 needs it locally and the auto-resolving 4.0.0-dev release needs a newer Dart SDK than this toolchain has (`3.12.0-249.0.dev`, a pre-release build that doesn't satisfy 4.0.0-dev's `>=3.12.0` constraint).
+**§8 Visual** — Playlists tab, detail page and the new search screen are all on
+the neon palette; the last teal/dark-blue holdouts are gone. Spotify green
+survives on exactly one control (Import), per §8.3. The §8.4 spoiler warning is
+now carried into the lobby, not just the console.
+
+**§11 Open questions** — resolved with the handoff's own suggested defaults:
+round count is configurable in lobby settings (5/10/15/20, default 10, with a
+warning when the playlist is too short). Random-seek and "bundled premades only"
+were already settled.
+
+## Known Gaps
+
+- **The client ID is still in git history** (the `INIT` commit). Removing it
+  needs a history rewrite, or just rotate the ID in the Spotify dashboard —
+  owner's call.
+- **Owner-only follow-ups**: register `spotify-sdk://auth` alongside
+  `off-the-record://callback`, and the package name
+  (`com.example.off_the_record`, still the template default) + keystore SHA-1,
+  in the Spotify developer dashboard.
+- **All on-device verification is still outstanding** — two-device lobby join
+  over Wi-Fi and over hotspot, real App Remote playback with Premium, and the
+  OAuth-close fix above. Verification here was analyze + test + APK build only.
+- Round-reveal and final-score screens remain extrapolated from the palette;
+  neither had a reference mockup.
 
 ## Best Place to Resume
 
-The roadmap's four priorities are functionally done. Next practical steps, roughly in order of likely value:
-1. On-device pass (owner): register the Spotify dashboard items above, then run a real two-device game end-to-end. This will surface whatever this session's automated verification (analyze/test/build only) couldn't catch.
-2. If continuing feature work: track search-and-add or collaborative playlists (Priority 2 extras), or the config-hygiene/state-management cleanup phase.
-3. If continuing visual work: bring the Playlists tab in line with the neon theme, or extend the mockup-matching treatment to the round-reveal/final-score screens (neither had a reference mockup — current design there is my own extrapolation from the palette, not a followed spec).
-4. Merge `playback` back toward `main` whenever the owner is satisfied with on-device testing — nothing here has been merged/pushed.
-
-## Quick Resume Summary
-
-OffTheRecord is a fully wired local-multiplayer Spotify trivia game: host creates a lobby (WebSocket + QR), players join and guess song titles, the host scores fuzzy matches and plays/pauses the actual track via Spotify App Remote, and everything is styled in a neon dark theme end-to-end except the Playlists tab. All four handoff-doc priorities are done and committed on the `playback` branch (unmerged). What's left is owner-side device/dashboard verification, and optional follow-on work (playlist search/collab, config cleanup, Playlists tab restyle).
+An on-device pass. The feature backlog from the handoff is empty; what's left is
+the class of problem only real hardware surfaces.

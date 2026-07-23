@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
-import 'package:off_the_record/dto/transfer.dart';
+import 'package:off_the_record/state/session_state.dart';
 import 'package:off_the_record/net/game_client.dart';
 import 'package:off_the_record/pages/lobby_ui.dart';
 import 'package:off_the_record/theme/palette.dart';
@@ -40,7 +40,7 @@ class _JoinScanPageState extends State<JoinScanPage> {
 
       client = GameClient();
       await client.connect(ip, port);
-      await client.join(room, playerName.isNotEmpty ? playerName : 'Guest');
+      await client.join(room, sessionState.displayName);
 
       if (!mounted) return;
       Navigator.pushReplacement(
@@ -87,24 +87,55 @@ class _JoinScanPageState extends State<JoinScanPage> {
                 child: CircularProgressIndicator(color: OtrColors.magenta),
               ),
             ),
-          if (_error != null)
-            Positioned(
-              left: 16,
-              right: 16,
-              bottom: 32,
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: OtrColors.surfaceRaised,
-                  borderRadius: BorderRadius.circular(8),
+          // §4b: on a host hotspot with no internet, Android offers to switch
+          // to mobile data — which silently kills the game socket.
+          Positioned(
+            left: 16,
+            right: 16,
+            bottom: 32,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (_error != null)
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    margin: const EdgeInsets.only(bottom: 12),
+                    decoration: BoxDecoration(
+                      color: OtrColors.surfaceRaised,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      _error!,
+                      style: const TextStyle(color: OtrColors.dangerRed),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: OtrColors.amberTintBg,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: OtrColors.amberTintBorder),
+                  ),
+                  child: const Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.wifi_tethering, color: OtrColors.amber, size: 18),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Join the host\'s network first. If Android says it has no '
+                          'internet, tap "stay connected" — the game runs entirely '
+                          'over Wi-Fi.',
+                          style: TextStyle(color: OtrColors.amberTintText, fontSize: 12),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                child: Text(
-                  _error!,
-                  style: const TextStyle(color: OtrColors.dangerRed),
-                  textAlign: TextAlign.center,
-                ),
-              ),
+              ],
             ),
+          ),
         ],
       ),
     );

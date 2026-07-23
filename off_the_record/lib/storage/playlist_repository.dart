@@ -115,6 +115,54 @@ class PlaylistRepository extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Appends a track found via Spotify search (handoff §5). Duplicates are
+  /// ignored so a double-tap in the search sheet can't corrupt the round list.
+  Future<bool> addTrack(String id, LocalTrack track) async {
+    final playlist = _get(id);
+    _requireEditable(playlist);
+    if (playlist.tracks.any((t) => t.spotifyTrackId == track.spotifyTrackId)) {
+      return false;
+    }
+    await _save(playlist.copyWith(tracks: [...playlist.tracks, track]));
+    notifyListeners();
+    return true;
+  }
+
+  /// Creates an empty local playlist for a user to fill via search.
+  Future<LocalPlaylist> create(String name) async {
+    final playlist = LocalPlaylist(id: _generateId(), name: name);
+    await _save(playlist);
+    notifyListeners();
+    return playlist;
+  }
+
+  /// Pushes a local playlist up to Spotify as a **collaborative** playlist and
+  /// links the local copy to it (handoff §5).
+  ///
+  /// Collaboration itself is entirely Spotify's — friends edit the playlist in
+  /// their own Spotify app, and [resync] pulls their changes back down. The app
+  /// deliberately implements no custom collab sync.
+  Future<LocalPlaylist> publishAsCollaborative(String id) async {
+    final playlist = _get(id);
+    // Premades stay read-only: linking one would let a resync overwrite the
+    // bundled list.
+    _requireEditable(playlist);
+    if (playlist.spotifyPlaylistId != null) {
+      throw StateError('This playlist is already linked to Spotify');
+    }
+
+    final spotifyId = await SpotApi.createPlaylist(playlist.name, collaborative: true);
+    await SpotApi.addTracksToPlaylist(
+      spotifyId,
+      playlist.tracks.map((t) => t.spotifyTrackId).toList(),
+    );
+
+    final linked = playlist.copyWith(spotifyPlaylistId: spotifyId);
+    await _save(linked);
+    notifyListeners();
+    return linked;
+  }
+
   Future<void> delete(String id) async {
     final playlist = _get(id);
     _requireEditable(playlist);
